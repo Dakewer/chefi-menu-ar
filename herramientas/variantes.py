@@ -8,7 +8,7 @@
 #   3. agrega el plato blanco a los que se generaron sin plato (hamburguesa y pastel: Tripo deforma el plato
 #      blanco, así que se generan sin él y se montan en el mismo plato de los modelos originales),
 #   4. escribe modelos/variantes/<platillo>_<bits>.glb (Draco, para Android) y .usdz (para iPhone).
-# Las variantes "de siempre" (hamburguesa_10, pasta_1, ensalada_1, pastel_0) son los modelos originales copiados.
+# Las variantes "de siempre" (hamburguesa_101, pasta_1, ensalada_1, pastel_0) son los modelos originales copiados.
 #
 # Uso (desde menu-web):  python herramientas/variantes.py <carpeta con los GLB crudos de Tripo> [nombre ...]
 # Requiere: numpy, trimesh, pillow, usd-core y npx (@gltf-transform/cli).
@@ -29,15 +29,19 @@ PLATO_Y = 0.006  # altura de la superficie del plato donde se apoya la comida
 # El lado mayor es el de los modelos originales: 21 cm la hamburguesa con sus papas, 15 cm la rebanada de pastel
 # y 27 cm el plato completo en los que ya lo traen.
 VARIANTES = {
-    "hamburguesa_11": (0.21, True, 0),
-    "hamburguesa_00": (0.21, True, 0),
-    "hamburguesa_01": (0.21, True, 0),
+    "hamburguesa_111": (0.21, True, 0),
+    "hamburguesa_001": (0.21, True, 0),
+    "hamburguesa_011": (0.21, True, 0),
+    "hamburguesa_100": (0.21, True, 0),  # las que terminan en 0 son de carne sencilla
+    "hamburguesa_110": (0.21, True, 0),
+    "hamburguesa_000": (0.21, True, 0),
+    "hamburguesa_010": (0.21, True, 0),
     "pastel_1": (0.15, True, 270),  # Tripo lo entregó girado respecto al pastel original
     "pasta_0": (0.27, False, 0),
     "ensalada_0": (0.27, False, 0),
 }
 # Variantes que son el modelo original tal cual.
-COPIAS = {"hamburguesa_10": "fuerte_hamburguesa", "pasta_1": "pasta_bolognesa", "ensalada_1": "ensalada", "pastel_0": "postre_pastel"}
+COPIAS = {"hamburguesa_101": "fuerte_hamburguesa", "pasta_1": "pasta_bolognesa", "ensalada_1": "ensalada", "pastel_0": "postre_pastel"}
 
 
 def gltf_transform(*args):

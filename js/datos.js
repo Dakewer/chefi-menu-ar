@@ -30,7 +30,8 @@ export const PLATILLOS = [
     contiene: "Gluten, lácteos",
         // Ingredientes que el comensal puede quitar o poner. Cada combinación tiene su foto y su modelo 3D propios
     // (hechos con IA a partir de la foto original; ver herramientas/variantes.py). {bits} = un 1 o un 0 por opción,
-    // en este orden (1 = lo lleva). `incluido` es como sale de cocina si no se cambia nada.
+    // en este orden (1 = lo lleva). `incluido` es como sale de cocina si no se cambia nada; `sin` es cómo se le dice
+    // cuando se quita (si no, "Sin ...").
     personalizar: {
       fotos: "img/variantes/hamburguesa_{bits}.webp",
       modelos: "modelos/variantes/hamburguesa_{bits}.glb",
@@ -38,6 +39,7 @@ export const PLATILLOS = [
       opciones: [
         { id: "lechuga", nombre: "Lechuga", icono: "lechuga", incluido: true },
         { id: "jitomate", nombre: "Jitomate", icono: "jitomate", incluido: false },
+        { id: "carne", nombre: "Doble carne", sin: "Carne sencilla", icono: "carne", incluido: true },
       ],
     },
   },

@@ -1,12 +1,12 @@
 // Lógica del menú digital: navegación, grupo, pedido, estado del pedido, cuenta, pago y encuestas.
 // No depende del diseño: busca los elementos por sus atributos data-* (ver README.md).
 
-import { CATEGORIAS, PLATILLOS, PROPINA_INICIAL, MAX_PERSONAS, ALERGIAS, MESERO, RESENA_GOOGLE, NIVELES, CALIFICAR, ASPECTOS_CHEF } from "./datos.js?v=202611131102";
-import { verEnMiMesa, arDisponible, archivosDe, precargarAR } from "./ar.js?v=202611131102";
-import { prepararAudio, escucharDesbloqueo, prepararHapticos, sentir, efecto, sonidoEstrella, sonidoCarita, sonidoToque, sonidoPropina } from "./sonido.js?v=202611131102";
-import { icono, carita, billete, monedaSvg } from "./iconos.js?v=202611131102";
-import { iniciarIntro } from "./intro.js?v=202611131102";
-import { iniciarFondo } from "./fondo.js?v=202611131102";
+import { CATEGORIAS, PLATILLOS, PROPINA_INICIAL, MAX_PERSONAS, ALERGIAS, MESERO, RESENA_GOOGLE, NIVELES, CALIFICAR, ASPECTOS_CHEF } from "./datos.js?v=202611190955";
+import { verEnMiMesa, arDisponible, archivosDe, precargarAR } from "./ar.js?v=202611190955";
+import { prepararAudio, escucharDesbloqueo, prepararHapticos, sentir, efecto, sonidoEstrella, sonidoCarita, sonidoToque, sonidoPropina } from "./sonido.js?v=202611190955";
+import { icono, carita, billete, monedaSvg } from "./iconos.js?v=202611190955";
+import { iniciarIntro } from "./intro.js?v=202611190955";
+import { iniciarFondo } from "./fondo.js?v=202611190955";
 
 const ORDEN = ["bienvenida", "mesa", "menu", "detalle", "pedido", "estado", "pago", "cuenta", "gracias"];
 const FRASES = ["El menú se digitaliza.", "Acerca tu celular.", "Elige tu platillo.", "Míralo en tu mesa.", "Pídelo.",
@@ -37,9 +37,11 @@ const estado = {
   propina: PROPINA_INICIAL,
   propinas: {}, // propina de cada persona (índice → %), si la cambió
   pagaCon: 0, // en efectivo: opción elegida en la barra de billetes
+  extraEfectivo: null, // en efectivo: si aceptó dar unos pesos más para que el cambio salga en un billete ({ clave })
   ultimoPago: null,
   dividir: "iguales",
   personasIguales: 1,
+  repartoAbierto: false, // en la cuenta: si se abrieron los ajustes de cómo repartir (ya se eligió al llegar)
   quienPaga: 0, // en "lo que consumí": índice de la persona que paga ahora (-1 = toda la mesa)
   metodo: "tarjeta",
   calif: { mesero: null, chef: null, motivos: { mesero: [], chef: [] }, aspectos: {} },
@@ -257,7 +259,7 @@ const eleccionInicial = (p) => Object.fromEntries((p.personalizar?.opciones ?? [
 // Lo que cambió respecto al platillo de siempre, para la nota de cocina: "Sin lechuga · Con jitomate".
 function textoEleccion(p, eleccion) {
   return (p.personalizar?.opciones ?? []).filter((o) => (eleccion?.[o.id] ?? o.incluido) !== o.incluido)
-    .map((o) => `${o.incluido ? "Sin" : "Con"} ${o.nombre.toLowerCase()}`).join(" · ");
+    .map((o) => (o.incluido ? o.sin ?? `Sin ${o.nombre.toLowerCase()}` : `Con ${o.nombre.toLowerCase()}`)).join(" · ");
 }
 
 // La foto del platillo. Al cambiar un ingrediente, la foto de esa combinación entra encima de la anterior.
@@ -302,7 +304,7 @@ function pintarGusto() {
     boton.dataset.valor = o.id;
     boton.querySelector(".gusto-icono").innerHTML = icono(o.icono);
     boton.querySelector(".gusto-nombre").textContent = o.nombre;
-    boton.querySelector(".gusto-estado").textContent = lleva ? `Con ${o.nombre.toLowerCase()}` : `Sin ${o.nombre.toLowerCase()}`;
+    boton.querySelector(".gusto-estado").textContent = lleva ? `Con ${o.nombre.toLowerCase()}` : o.sin ?? `Sin ${o.nombre.toLowerCase()}`;
     boton.classList.toggle("activo", lleva);
     boton.setAttribute("aria-pressed", lleva);
     return boton;
@@ -538,7 +540,9 @@ function bases() {
 
 function cuentas() {
   return bases().map((base, i) => {
-    const propina = propinaLibre() ? Math.round(base * pctDe(i)) / 100 : 0;
+    let propina = propinaLibre() ? Math.round(base * pctDe(i)) / 100 : 0;
+    // En efectivo no hay centavos: lo que falta para cerrar al peso se va a la propina.
+    if (estado.metodo === "efectivo" && propina > 0) propina = Math.ceil(base + propina - 0.001) - base;
     return { base, propina, pct: pctDe(i), total: base + propina };
   });
 }
@@ -558,7 +562,7 @@ function aPagar() {
 const BILLETES = [1000, 500, 200, 100, 50, 20];
 function opcionesEfectivo(monto) {
   const opciones = new Set([Math.ceil(monto)]);
-  for (const b of [50, 100, 200, 500, 1000]) opciones.add(Math.ceil((monto + 0.001) / b) * b);
+  for (const b of [20, 50, 100, 200, 500, 1000]) opciones.add(Math.ceil((monto + 0.001) / b) * b);
   return [...opciones].filter((v) => v <= monto + 1000).sort((x, y) => x - y).slice(0, 6);
 }
 // Cómo juntar un monto con billetes (y monedas para lo que sobra).
@@ -568,6 +572,41 @@ function desglosar(monto) {
   for (const b of BILLETES) while (resto >= b) { piezas.push(b); resto -= b; }
   for (const m of [10, 5, 2, 1]) while (resto >= m) { piezas.push(m); resto -= m; }
   return piezas;
+}
+
+// Ayuda con el cambio: si el cambio saldría en muchas piezas, propone dar unos pesos más para que el mesero
+// regrese un solo billete (cuenta de $305 pagando con $500: con $5 más, regresan un billete de $200 y no $195).
+const cuantasPiezas = (monto) => desglosar(monto).length;
+const EXTRAS = [1, 2, 5, 10, 20, 50].flatMap((a, i, t) => [a, ...t.slice(i).map((b) => a + b)])
+  .filter((v, i, t) => v <= 50 && t.indexOf(v) === i).sort((a, b) => a - b);
+function ayudaCambio(con, total) {
+  const cambio = con - total;
+  if (cambio <= 0 || !Number.isInteger(cambio)) return null;
+  const antes = cuantasPiezas(cambio);
+  let mejor = null;
+  for (const extra of EXTRAS) {
+    if (extra >= cambio) break;
+    const piezas = desglosar(cambio + extra);
+    const ahorro = antes - piezas.length;
+    if (piezas.length <= 2 && ahorro >= 2 && ahorro > cuantasPiezas(extra) && (!mejor || ahorro > mejor.ahorro)) mejor = { extra, piezas, ahorro, antes, cambio };
+  }
+  return mejor;
+}
+const nombrePieza = (v) => (v >= 20 ? `billete de $${v}` : `moneda de $${v}`);
+function comoRegresan(piezas) {
+  const [a, b] = piezas;
+  if (b === undefined) return `${a >= 20 ? "un solo" : "una sola"} ${nombrePieza(a)}`;
+  if (a === b) return `dos ${a >= 20 ? "billetes" : "monedas"} de $${a}`;
+  return `${a >= 20 ? "un" : "una"} ${nombrePieza(a)} y ${b >= 20 ? "un" : "una"} ${nombrePieza(b)}`;
+}
+// Lo que entrega en efectivo quien paga ahora: el billete elegido más, si aceptó, los pesos extra.
+function efectivoDe(pago) {
+  const opciones = opcionesEfectivo(pago.total);
+  const con = opciones[Math.min(estado.pagaCon ?? 0, opciones.length - 1)];
+  const ayuda = ayudaCambio(con, pago.total);
+  const clave = `${con}|${pago.total}`;
+  const extra = ayuda && estado.extraEfectivo?.clave === clave ? ayuda.extra : 0;
+  return { con, ayuda, clave, extra, entrega: con + extra };
 }
 
 function pintarPago() {
@@ -590,6 +629,12 @@ function pintarDivision() {
     b.classList.toggle("activo", b.dataset.valor === estado.dividir);
     b.setAttribute("aria-selected", b.dataset.valor === estado.dividir);
   });
+  // Lo elegido al llegar a la mesa ya viene puesto; los ajustes solo se ven si se toca "Cambiar".
+  const partes = estado.personasIguales;
+  texto("reparto-elegido", consumo ? "Cada quien paga lo suyo" : partes > 1 ? `Partes iguales entre ${partes}` : "Una sola cuenta");
+  texto("boton-reparto", estado.repartoAbierto ? "Listo" : consumo || partes > 1 ? "Cambiar" : "Dividir");
+  ref("boton-reparto").setAttribute("aria-expanded", estado.repartoAbierto);
+  ref("reparto-ajustes").hidden = !estado.repartoAbierto;
   ref("panel-iguales").hidden = consumo;
   ref("panel-consumo").hidden = !consumo;
   texto("personas", estado.personasIguales);
@@ -681,15 +726,27 @@ function pintarEfectivo(pago = aPagar()) {
     m.classList.toggle("activo", i === estado.pagaCon);
     return m;
   }));
-  const con = opciones[estado.pagaCon];
-  const cambio = con - pago.total;
-  texto("paga-con", estado.pagaCon === 0 ? "Exacto" : `$${con}`);
-  pintarBilletes(desglosar(con));
+  const { con, ayuda, extra, entrega } = efectivoDe(pago);
+  const cambio = entrega - pago.total;
+  texto("paga-con", estado.pagaCon === 0 ? "Exacto" : `$${entrega}`);
+  pintarBilletes([...desglosar(con), ...(extra ? desglosar(extra) : [])]);
+  const caja = ref("ayuda-cambio");
+  caja.hidden = !ayuda;
+  caja.classList.toggle("activo", extra > 0);
+  if (ayuda) {
+    const regreso = comoRegresan(ayuda.piezas);
+    caja.innerHTML = `
+      <span class="ayuda-pieza" aria-hidden="true">${ayuda.extra >= 20 ? billete(ayuda.extra) : monedaSvg(ayuda.extra)}</span>
+      <p>${extra
+        ? `<strong>Listo: das $${entrega}</strong> y te regresan ${regreso}.`
+        : `<strong>¿Traes $${ayuda.extra} más?</strong> Si das $${con + ayuda.extra}, te regresan ${regreso} en vez de $${ayuda.cambio} en ${ayuda.antes} piezas.`}</p>
+      <button type="button" data-accion="extra-efectivo" aria-pressed="${extra > 0}">${extra ? "Quitar" : `Sí, tengo $${ayuda.extra}`}</button>`;
+  }
   ref("desglose").innerHTML = `
     <div><dt>Consumo</dt><dd>${dinero.format(pago.base)}</dd></div>
     <div><dt>Propina (${pago.pct}%)</dt><dd>${dinero.format(pago.propina)}</dd></div>
     <div class="fuerte"><dt>Total a dejar</dt><dd>${dinero.format(pago.total)}</dd></div>
-    <div><dt>Pagas con</dt><dd>${dinero.format(con)}</dd></div>
+    <div><dt>Pagas con</dt><dd>${dinero.format(entrega)}</dd></div>
     <div class="cambio"><dt>Te regresan</dt><dd>${dinero.format(Math.max(0, cambio))}</dd></div>`;
 }
 
@@ -936,9 +993,11 @@ const acciones = {
     if (estado.personasIguales < personas().length) estado.personasIguales = personas().length;
     estado.quienPaga = conAmigos() ? 0 : -1;
     estado.pagaCon = 0;
+    estado.repartoAbierto = false;
     efecto("seleccion");
     ir("cuenta");
   },
+  "abrir-reparto": () => { estado.repartoAbierto = !estado.repartoAbierto; efecto("seleccion"); pintarDivision(); },
   dividir: (el) => { estado.dividir = el.dataset.valor; efecto("seleccion"); pintarDivision(); },
   "mas-personas": () => {
     estado.personasIguales = Math.min(MAX_PERSONAS, estado.personasIguales + 1);
@@ -960,10 +1019,16 @@ const acciones = {
     estado.pagaCon = valor;
     pintarEfectivo();
   },
+  "extra-efectivo": () => {
+    const e = efectivoDe(aPagar());
+    estado.extraEfectivo = e.extra ? null : { clave: e.clave };
+    efecto(e.extra ? "menos" : "billete");
+    pintarEfectivo();
+  },
   "quien-paga": (el) => { estado.quienPaga = Number(el.dataset.valor); estado.pagaCon = 0; efecto("seleccion"); pintarDivision(); },
   pagar: () => {
     const pago = aPagar();
-    const con = estado.metodo === "efectivo" ? opcionesEfectivo(pago.total)[estado.pagaCon] : null;
+    const con = estado.metodo === "efectivo" ? efectivoDe(pago).entrega : null;
     estado.ultimoPago = { metodo: estado.metodo, total: pago.total, propina: pago.propina, con };
     efecto(`pago-${estado.metodo}`);
     estado.propinas = {};
@@ -1155,4 +1220,4 @@ setInterval(revisarEtapa, 500);
 iniciarIntro({ mostrar: () => document.body.classList.add("listo"), mesa: estado.mesa ? `Mesa ${estado.mesa}` : "Bienvenido" });
 mostrar();
 // Panel de prueba de sonido y vibración: agregar ?prueba a la dirección.
-if (new URLSearchParams(location.search).has("prueba")) import("./prueba.js?v=202611131102").then((m) => m.abrirPrueba());
+if (new URLSearchParams(location.search).has("prueba")) import("./prueba.js?v=202611190955").then((m) => m.abrirPrueba());

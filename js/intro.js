@@ -7,8 +7,8 @@
 // - si no, las bolitas flotan en espera con "Toca para entrar" y ese toque arranca el logo reveal con su sonido
 //   (y en iPhone da el golpe háptico, porque es un toque real).
 
-import { sonar, sonidoLogo, efecto, audioActivo, desbloquearAudio, vibrar, ES_IOS } from "./sonido.js?v=202611131102";
-import { icono } from "./iconos.js?v=202611131102";
+import { sonar, sonidoLogo, efecto, audioActivo, desbloquearAudio, vibrar, ES_IOS } from "./sonido.js?v=202611190955";
+import { icono } from "./iconos.js?v=202611190955";
 
 const FPS = 30;
 const FIN = 150; // cuadro en que la experiencia entra (el render web duraba 156)

@@ -732,6 +732,12 @@ button, .tarjeta, .metodos label { position: relative; overflow: hidden; }
 .marcas { display: flex; justify-content: space-between; font-size: .72rem; color: var(--gris); font-weight: 700; margin: 4px 2px 8px; }
 .tarjeta-control .nota { margin: 0; }
 
+.reparto-resumen { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reparto-resumen .rotulo { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--gris, #6E6259); }
+.reparto-elegido { margin: 0; font-weight: 800; font-size: 17px; }
+.boton-cambiar { position: relative; flex: none; padding: 8px 16px; border: var(--borde); border-radius: 999px; background: var(--crema-2); font-weight: 700; color: var(--carbon); }
+.reparto-ajustes { margin-top: 14px; }
+.reparto-ajustes[hidden] { display: none; }
 .segmentos { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 14px; border-radius: 999px; background: var(--crema-2); border: var(--borde); }
 .segmentos button { min-height: 40px; border: 0; border-radius: 999px; background: none; font-weight: 700; font-size: .88rem; transition: background .25s, color .25s; }
 .segmentos button.activo { background: var(--carbon); color: var(--crema); }
@@ -945,6 +951,15 @@ button, .tarjeta, .metodos label { position: relative; overflow: hidden; }
 [data-lista="marcas-billete"] { margin: 0 -4px 8px; }
 [data-lista="marcas-billete"] button { flex: 1; min-height: 40px; padding: 4px 2px; border: 0; border-radius: 12px; background: none; font: inherit; color: inherit; text-align: center; }
 [data-lista="marcas-billete"] button.activo { color: var(--carbon); background: var(--crema-2); }
+.ayuda-cambio { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 12px; margin: 10px 0 6px; padding: 12px; border: var(--borde); border-radius: 16px; background: var(--blanco); }
+.ayuda-cambio[hidden] { display: none; }
+.ayuda-cambio.activo { background: #E4F4EB; border-color: var(--verde); }
+.ayuda-cambio p { margin: 0; font-size: .86rem; line-height: 1.35; }
+.ayuda-cambio p strong { display: block; font-size: .95rem; }
+.ayuda-pieza { display: grid; place-items: center; width: 54px; }
+.ayuda-pieza svg { max-width: 54px; height: auto; }
+.ayuda-cambio button { position: relative; grid-column: 1 / -1; padding: 10px 14px; border: var(--borde); border-radius: 999px; background: var(--naranja); color: var(--blanco); font-weight: 800; }
+.ayuda-cambio.activo button { background: var(--blanco); color: var(--carbon); }
 .desglose { display: grid; gap: 0; margin: 6px 0 0; }
 .desglose div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1.5px dashed var(--linea); font-size: .9rem; }
 .desglose div:last-child { border-bottom: 0; }

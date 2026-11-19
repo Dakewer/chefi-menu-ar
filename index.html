@@ -11,8 +11,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Inter+Tight:wght@400;500;600;700;800&family=Fredoka:wght@500;600&display=swap">
   <link rel="icon" href="img/icono.svg" type="image/svg+xml">
   <link rel="preload" href="img/hero_hamburguesa.webp" as="image" type="image/webp" fetchpriority="high">
-  <link rel="stylesheet" href="css/estilos.css?v=202611131102">
-  <script type="module" src="js/app.js?v=202611131102"></script>
+  <link rel="stylesheet" href="css/estilos.css?v=202611190955">
+  <script type="module" src="js/app.js?v=202611190955"></script>
 </head>
 <body>
   <!--
@@ -292,22 +292,31 @@
       <p class="subtotal">Consumo de la mesa <strong data-ref="subtotal"></strong></p>
 
       <div class="tarjeta-control">
-        <p class="rotulo">Repartir la cuenta</p>
-        <div class="segmentos" role="tablist">
-          <button role="tab" data-accion="dividir" data-valor="iguales">Partes iguales</button>
-          <button role="tab" data-accion="dividir" data-valor="consumo">Lo que consumí</button>
-        </div>
-        <div class="control-encabezado" data-ref="panel-iguales">
-          <p>Entre cuántos</p>
-          <div class="cantidad">
-            <button class="boton-icono" data-accion="menos-personas" aria-label="Menos personas">−</button>
-            <span data-ref="personas">1</span>
-            <button class="boton-icono" data-accion="mas-personas" aria-label="Más personas">+</button>
+        <!-- Cómo se reparte ya se eligió al llegar a la mesa: aquí solo se recuerda. "Cambiar" abre los ajustes. -->
+        <div class="reparto-resumen">
+          <div>
+            <p class="rotulo">Así se reparte la cuenta</p>
+            <p class="reparto-elegido" data-ref="reparto-elegido"></p>
           </div>
+          <button class="boton-cambiar" data-accion="abrir-reparto" data-ref="boton-reparto" aria-expanded="false">Cambiar</button>
         </div>
-        <div data-ref="panel-consumo" hidden>
-          <p class="nota">Toca la persona junto a cada platillo para cambiar quién lo pidió.</p>
-          <div data-lista="asignar"></div>
+        <div class="reparto-ajustes" data-ref="reparto-ajustes" hidden>
+          <div class="segmentos" role="tablist">
+            <button role="tab" data-accion="dividir" data-valor="iguales">Partes iguales</button>
+            <button role="tab" data-accion="dividir" data-valor="consumo">Cada quien lo suyo</button>
+          </div>
+          <div class="control-encabezado" data-ref="panel-iguales">
+            <p>Entre cuántos</p>
+            <div class="cantidad">
+              <button class="boton-icono" data-accion="menos-personas" aria-label="Menos personas">−</button>
+              <span data-ref="personas">1</span>
+              <button class="boton-icono" data-accion="mas-personas" aria-label="Más personas">+</button>
+            </div>
+          </div>
+          <div data-ref="panel-consumo" hidden>
+            <p class="nota">Toca la persona junto a cada platillo para cambiar quién lo pidió.</p>
+            <div data-lista="asignar"></div>
+          </div>
         </div>
         <div data-ref="bloque-quien">
           <p class="rotulo rotulo-quien">¿Quién paga ahora?</p>
@@ -347,6 +356,8 @@
           <input type="range" min="0" max="3" step="1" data-ref="billete-rango" aria-label="Billete con el que pagas">
         </div>
         <div class="marcas" data-lista="marcas-billete"></div>
+        <!-- Ayuda con el cambio: "¿Traes $5 más? Te regresan un billete de $200" -->
+        <div class="ayuda-cambio" data-ref="ayuda-cambio" hidden></div>
         <dl class="desglose" data-ref="desglose"></dl>
       </div>
 
