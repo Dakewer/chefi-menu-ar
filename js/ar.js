@@ -22,9 +22,20 @@ export function archivosDe(platillo, eleccion) {
   return { foto: poner(per.fotos) ?? platillo.foto, glb: poner(per.modelos) ?? platillo.modelo, usdz: poner(per.modelosIOS) ?? platillo.modeloIOS };
 }
 
+// Safari avisa que sabe abrir AR Quick Look. Chrome, Edge, Firefox, DuckDuckGo y la app de Google en iPhone
+// no lo avisan (corren dentro de un WKWebView), pero sí lo abren con el mismo enlace.
 function quickLookDisponible() {
   const a = document.createElement("a");
-  return Boolean(a.relList?.supports?.("ar"));
+  if (a.relList?.supports?.("ar")) return true;
+  const incrustado = Boolean(window.webkit?.messageHandlers);
+  return incrustado && /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent);
+}
+
+// Texto para cuando no se puede abrir la cámara con el platillo.
+export function avisoSinAR() {
+  return ES_IOS || ES_ANDROID
+    ? "Abre este menú en Safari o Chrome para ver el platillo sobre tu mesa."
+    : "Abre este menú en tu celular para ver el platillo sobre tu mesa.";
 }
 
 // true si este celular puede abrir la cámara con el platillo. En computadora es false.

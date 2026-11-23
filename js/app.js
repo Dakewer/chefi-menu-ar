@@ -1,12 +1,12 @@
 // Lógica del menú digital: navegación, grupo, pedido, estado del pedido, cuenta, pago y encuestas.
 // No depende del diseño: busca los elementos por sus atributos data-* (ver README.md).
 
-import { CATEGORIAS, PLATILLOS, PROPINA_INICIAL, MAX_PERSONAS, ALERGIAS, MESERO, RESENA_GOOGLE, NIVELES, CALIFICAR, ASPECTOS_CHEF } from "./datos.js?v=202611190955";
-import { verEnMiMesa, arDisponible, archivosDe, precargarAR } from "./ar.js?v=202611190955";
-import { prepararAudio, escucharDesbloqueo, prepararHapticos, sentir, efecto, sonidoEstrella, sonidoCarita, sonidoToque, sonidoPropina } from "./sonido.js?v=202611190955";
-import { icono, carita, billete, monedaSvg } from "./iconos.js?v=202611190955";
-import { iniciarIntro } from "./intro.js?v=202611190955";
-import { iniciarFondo } from "./fondo.js?v=202611190955";
+import { CATEGORIAS, PLATILLOS, PROPINA_INICIAL, MAX_PERSONAS, ALERGIAS, MESERO, RESENA_GOOGLE, NIVELES, CALIFICAR, ASPECTOS_CHEF } from "./datos.js?v=202611221800";
+import { verEnMiMesa, arDisponible, archivosDe, precargarAR, avisoSinAR } from "./ar.js?v=202611221800";
+import { prepararAudio, escucharDesbloqueo, prepararHapticos, sentir, efecto, sonidoEstrella, sonidoCarita, sonidoToque, sonidoPropina } from "./sonido.js?v=202611221800";
+import { icono, carita, billete, monedaSvg } from "./iconos.js?v=202611221800";
+import { iniciarIntro } from "./intro.js?v=202611221800";
+import { iniciarFondo } from "./fondo.js?v=202611221800";
 
 const ORDEN = ["bienvenida", "mesa", "menu", "detalle", "pedido", "estado", "pago", "cuenta", "gracias"];
 const FRASES = ["El menú se digitaliza.", "Acerca tu celular.", "Elige tu platillo.", "Míralo en tu mesa.", "Pídelo.",
@@ -953,6 +953,7 @@ const acciones = {
     efecto("abrir");
     guardar(); // en iPhone la página puede recargarse al volver de la cámara
     const abierto = verEnMiMesa(platillo(estado.actual), estado.personal);
+    ref("aviso-ar").textContent = avisoSinAR();
     ref("aviso-ar").hidden = abierto;
   },
   gusto: (el) => {
@@ -1220,4 +1221,4 @@ setInterval(revisarEtapa, 500);
 iniciarIntro({ mostrar: () => document.body.classList.add("listo"), mesa: estado.mesa ? `Mesa ${estado.mesa}` : "Bienvenido" });
 mostrar();
 // Panel de prueba de sonido y vibración: agregar ?prueba a la dirección.
-if (new URLSearchParams(location.search).has("prueba")) import("./prueba.js?v=202611190955").then((m) => m.abrirPrueba());
+if (new URLSearchParams(location.search).has("prueba")) import("./prueba.js?v=202611221800").then((m) => m.abrirPrueba());
