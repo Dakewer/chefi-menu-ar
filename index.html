@@ -276,11 +276,12 @@
       <p class="antetitulo">Paso 1 de 2</p>
       <h2>¿Cómo quieres pagar?</h2>
       <p class="a-pagar">Consumo de la mesa <strong data-ref="a-pagar"></strong></p>
-      <div class="metodos">
+      <fieldset class="metodos">
+        <legend class="solo-lectores">Método de pago</legend>
         <label><input type="radio" name="metodo" value="tarjeta" checked><span class="metodo-icono" data-icono="tarjeta"></span><span>Tarjeta<small>Te llevamos la terminal</small></span></label>
         <label><input type="radio" name="metodo" value="en-linea"><span class="metodo-icono" data-icono="en-linea"></span><span>Pago en línea<small>Desde este celular</small></span></label>
         <label><input type="radio" name="metodo" value="efectivo"><span class="metodo-icono" data-icono="efectivo"></span><span>Efectivo<small>Un mesero pasa a cobrar</small></span></label>
-      </div>
+      </fieldset>
       <button class="boton-principal" data-accion="elegir-metodo">Continuar</button>
     </section>
 
