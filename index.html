@@ -56,7 +56,7 @@
     <section class="pantalla" data-pantalla="bienvenida">
       <div class="heroe">
         <p class="heroe-saludo" data-ref="saludo">Bienvenido a la mesa</p>
-        <h1 class="heroe-titulo" aria-live="polite">
+        <h1 class="heroe-titulo" aria-label="Míralo en tu mesa">
           <span class="heroe-frase" data-ref="frase-heroe">El menú se digitaliza.</span>
         </h1>
         <div class="heroe-puntos" data-lista="puntos-heroe" aria-hidden="true"></div>
@@ -152,7 +152,7 @@
         <p class="rotulo">¿Quiénes están en la mesa?</p>
         <div class="personas" data-lista="personas-grupo"></div>
         <form class="agregar-persona" data-ref="form-persona">
-          <input type="text" data-ref="nombre-persona" placeholder="Nombre de tu amigo" maxlength="14" autocomplete="off">
+          <input type="text" data-ref="nombre-persona" aria-label="Nombre de tu amigo" placeholder="Nombre de tu amigo" maxlength="14" autocomplete="off">
           <button class="boton-icono" type="submit" aria-label="Agregar persona">+</button>
         </form>
 
@@ -200,7 +200,7 @@
       <p class="aviso-ar" data-ref="aviso-ar" hidden>Abre este menú en tu celular para ver el platillo sobre tu mesa.</p>
 
       <div class="encabezado-platillo">
-        <h2 data-ref="nombre"></h2>
+        <h2 data-ref="nombre">Platillo</h2>
         <p class="precio" data-ref="precio"></p>
       </div>
       <p class="descripcion" data-ref="descripcion"></p>
@@ -216,9 +216,9 @@
       <div class="bloque">
         <p class="rotulo rotulo-alergia">¿Alguna alergia?</p>
         <div class="alergias" data-lista="alergias"></div>
-        <input class="entrada" type="text" data-ref="otra-alergia" placeholder="¿Otra alergia? Escríbela aquí">
+        <input class="entrada" type="text" data-ref="otra-alergia" aria-label="Otra alergia" placeholder="¿Otra alergia? Escríbela aquí">
         <p class="rotulo">Notas para cocina</p>
-        <input class="entrada" type="text" data-ref="notas" placeholder="Ej. sin cebolla, término medio…">
+        <input class="entrada" type="text" data-ref="notas" aria-label="Notas para cocina" placeholder="Ej. sin cebolla, término medio…">
         <div class="para-quien" data-ref="para-quien" hidden>
           <p class="rotulo">¿Para quién es?</p>
           <div class="opciones envolver" data-lista="para-quien"></div>
@@ -419,7 +419,7 @@
           <div><strong>Chefi · Restaurante</strong><small>Publicar reseña en Google</small></div>
         </div>
         <div class="estrellas google-estrellas" data-lista="estrellas-google"></div>
-        <textarea data-ref="texto-google" rows="3" placeholder="Comparte detalles de tu experiencia (opcional)"></textarea>
+        <textarea data-ref="texto-google" rows="3" aria-label="Tu reseña en Google" placeholder="Comparte detalles de tu experiencia (opcional)"></textarea>
         <button class="google-publicar" data-accion="publicar-google">Publicar</button>
         <small class="google-nota">Se abrirá Google para confirmar tu reseña. Tu texto se copia para que solo lo pegues.</small>
       </div>
